@@ -1,18 +1,22 @@
 package ru.yandex.practicum.service.hub;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
-import ru.yandex.practicum.kafka.producer.KafkaEventProducer;
-import ru.yandex.practicum.model.hub.HubEvent;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-
-import static ru.yandex.practicum.kafka.config.KafkaConfig.TopicType.HUBS_EVENTS;
+import ru.yandex.practicum.kafka.KafkaClientProducer;
+import ru.yandex.practicum.model.hub.HubEvent;
 
 @Slf4j
-@AllArgsConstructor
-public abstract class BaseHubEventHandler <T extends SpecificRecordBase> implements HubEventHandler {
-    protected final KafkaEventProducer producer;
+@RequiredArgsConstructor
+public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
+    protected final KafkaClientProducer producer;
+
+    @Value("${kafka.topic.hub}")
+    protected String topic;
+
     protected abstract T mapToAvro(HubEvent event);
 
     @Override
@@ -21,12 +25,24 @@ public abstract class BaseHubEventHandler <T extends SpecificRecordBase> impleme
             throw new IllegalArgumentException("Неизвестный тип события: " + event.getType());
         }
 
+        //преобразование события в Avro запись
         T payload = mapToAvro(event);
+
         HubEventAvro eventAvro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
                 .setTimestamp(event.getTimestamp())
                 .setPayload(payload)
                 .build();
-        producer.send(eventAvro, event.getHubId(), event.getTimestamp(), HUBS_EVENTS);
+
+        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+                topic,
+                null,
+                event.getTimestamp().toEpochMilli(),
+                eventAvro.getHubId(),
+                eventAvro);
+
+        producer.getProducer().send(record);
+
+        log.info("Отправили в Kafka: {}", record);
     }
 }

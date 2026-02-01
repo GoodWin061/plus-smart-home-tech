@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SwitchSensorEvent extends SensorEvent {
     @NotNull
-    boolean state;
+    Boolean state;
 
     @Override
     public SensorEventType getType() {

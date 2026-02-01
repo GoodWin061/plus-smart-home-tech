@@ -1,48 +1,60 @@
 package ru.yandex.practicum.service.hub;
 
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.kafka.producer.KafkaEventProducer;
-import ru.yandex.practicum.model.hub.*;
-import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.kafka.telemetry.event.*;
+import ru.yandex.practicum.kafka.KafkaClientProducer;
+import ru.yandex.practicum.model.hub.HubEvent;
+import ru.yandex.practicum.model.hub.HubEventType;
+import ru.yandex.practicum.model.hub.DeviceAction;
+import ru.yandex.practicum.model.hub.ScenarioAddedEvent;
+import ru.yandex.practicum.model.hub.ScenarioCondition;
 
-@Service
+@Component
 public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAddedEventAvro> {
-    public ScenarioAddedEventHandler(KafkaEventProducer producer) {
+    public ScenarioAddedEventHandler(KafkaClientProducer producer) {
         super(producer);
+    }
+
+    @Override
+    protected ScenarioAddedEventAvro mapToAvro(HubEvent event) {
+        ScenarioAddedEvent scenarioAddedEvent = (ScenarioAddedEvent) event;
+        return ScenarioAddedEventAvro.newBuilder()
+                .setName(scenarioAddedEvent.getName())
+                .setConditions(scenarioAddedEvent.getConditions().stream()
+                        .map(this::mapToConditionAvro)
+                        .toList())
+                .setActions(scenarioAddedEvent.getActions().stream()
+                        .map(this::mapToActionAvro)
+                        .toList())
+                .build();
+    }
+
+    private ScenarioConditionAvro mapToConditionAvro(ScenarioCondition scenarioCondition) {
+
+        return ScenarioConditionAvro.newBuilder()
+                .setSensorId(scenarioCondition.getSensorId())
+                .setOperation(ConditionOperationAvro.valueOf(scenarioCondition.getOperation().name()))
+                .setType(ConditionTypeAvro.valueOf(scenarioCondition.getType().name()))
+                .setValue(scenarioCondition.getValue())
+                .build();
+    }
+
+    private DeviceActionAvro mapToActionAvro(DeviceAction deviceAction) {
+        ActionTypeAvro actionTypeAvro = switch (deviceAction.getType()) {
+            case INVERSE -> ActionTypeAvro.INVERSE;
+            case ACTIVATE -> ActionTypeAvro.ACTIVATE;
+            case SET_VALUE -> ActionTypeAvro.SET_VALUE;
+            case DEACTIVATE -> ActionTypeAvro.DEACTIVATE;
+        };
+        return DeviceActionAvro.newBuilder()
+                .setSensorId(deviceAction.getSensorId())
+                .setType(ActionTypeAvro.valueOf(deviceAction.getType().name()))
+                .setValue(deviceAction.getValue())
+                .build();
     }
 
     @Override
     public HubEventType getMessageType() {
         return HubEventType.SCENARIO_ADDED;
-    }
-
-    @Override
-    protected ScenarioAddedEventAvro mapToAvro(HubEvent event) {
-        var scenarioEvent = (ScenarioAddedEvent) event;
-
-        return new ScenarioAddedEventAvro(
-                scenarioEvent.getName(),
-                scenarioEvent.getConditions().stream().map(this::mapConditionToAvro).toList(),
-                scenarioEvent.getActions().stream().map(this::mapActionToAvro).toList()
-        );
-    }
-
-    private ScenarioConditionAvro mapConditionToAvro(ScenarioCondition condition) {
-        return new ScenarioConditionAvro(
-                condition.getSensorId(),
-                ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro.valueOf(condition.getType().name()),
-                ru.yandex.practicum.kafka.telemetry.event.ConditionOperationAvro.valueOf(condition.getOperation().name()),
-                condition.getValue()
-        );
-    }
-
-    private DeviceActionAvro mapActionToAvro(DeviceAction action) {
-        return new DeviceActionAvro(
-                action.getSensorId(),
-                ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro.valueOf(action.getType().name()),
-                action.getValue()
-        );
     }
 }

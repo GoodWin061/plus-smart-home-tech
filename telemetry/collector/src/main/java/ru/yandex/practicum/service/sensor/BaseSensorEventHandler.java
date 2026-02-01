@@ -3,16 +3,20 @@ package ru.yandex.practicum.service.sensor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
-import ru.yandex.practicum.kafka.producer.KafkaEventProducer;
-import ru.yandex.practicum.model.sensor.SensorEvent;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-
-import static ru.yandex.practicum.kafka.config.KafkaConfig.TopicType.SENSORS_EVENTS;
+import ru.yandex.practicum.kafka.KafkaClientProducer;
+import ru.yandex.practicum.model.sensor.SensorEvent;
 
 @Slf4j
 @RequiredArgsConstructor
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
-    protected final KafkaEventProducer producer;
+    protected final KafkaClientProducer producer;
+
+    @Value("${kafka.topic.sensor}")
+    protected String topic;
+
     protected abstract T mapToAvro(SensorEvent event);
 
     @Override
@@ -21,7 +25,9 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
             throw new IllegalArgumentException("Неизвестный тип события: " + event.getType());
         }
 
+        //преобразование события в Avro запись
         T payload = mapToAvro(event);
+
         SensorEventAvro eventAvro = SensorEventAvro.newBuilder()
                 .setHubId(event.getHubId())
                 .setId(event.getId())
@@ -29,6 +35,15 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
                 .setPayload(payload)
                 .build();
 
-        producer.send(eventAvro, event.getHubId(), event.getTimestamp(), SENSORS_EVENTS);
+        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+                topic,
+                null,
+                event.getTimestamp().toEpochMilli(),
+                eventAvro.getHubId(),
+                eventAvro);
+
+        producer.getProducer().send(record);
+
+        log.info("Отправили в Kafka: {}", record);
     }
 }

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kafka.serializer;
+package ru.yandex.practicum.kafka;
 
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
@@ -12,16 +12,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class GeneralAvroSerializer implements Serializer<SpecificRecordBase> {
-    private final EncoderFactory encoderFactory;
+
+    private final EncoderFactory encoderFactory = EncoderFactory.get();
     private BinaryEncoder encoder;
-
-    public GeneralAvroSerializer() {
-        this.encoderFactory = EncoderFactory.get();
-    }
-
-    public GeneralAvroSerializer(EncoderFactory encoderFactory) {
-        this.encoderFactory = encoderFactory;
-    }
 
     public byte[] serialize(String topic, SpecificRecordBase data) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -35,7 +28,7 @@ public class GeneralAvroSerializer implements Serializer<SpecificRecordBase> {
             }
             return result;
         } catch (IOException ex) {
-            throw new SerializationException("Ошибка сериализации для топика [" + topic + "]", ex);
+            throw new SerializationException("Ошибка сериализации данных для топика [" + topic + "]", ex);
         }
     }
 }
