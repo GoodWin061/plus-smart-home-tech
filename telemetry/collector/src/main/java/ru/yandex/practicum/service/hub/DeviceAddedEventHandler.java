@@ -15,7 +15,7 @@ public class DeviceAddedEventHandler extends BaseHubEventHandler<DeviceAddedEven
     }
 
     @Override
-    protected DeviceAddedEventAvro mapToAvro(HubEvent event) {
+    public DeviceAddedEventAvro mapToAvro(HubEvent event) {
         DeviceAddedEvent deviceAddedEvent = (DeviceAddedEvent) event;
 
         return DeviceAddedEventAvro.newBuilder()

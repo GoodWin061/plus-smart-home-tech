@@ -16,7 +16,7 @@ public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAdded
     }
 
     @Override
-    protected ScenarioAddedEventAvro mapToAvro(HubEvent event) {
+    public ScenarioAddedEventAvro mapToAvro(HubEvent event) {
         ScenarioAddedEvent scenarioAddedEvent = (ScenarioAddedEvent) event;
         return ScenarioAddedEventAvro.newBuilder()
                 .setName(scenarioAddedEvent.getName())
