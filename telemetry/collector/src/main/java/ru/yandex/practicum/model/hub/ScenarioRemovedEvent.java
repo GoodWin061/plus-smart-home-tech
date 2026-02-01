@@ -1,21 +1,16 @@
 package ru.yandex.practicum.model.hub;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString(callSuper = true)
 public class ScenarioRemovedEvent extends HubEvent {
-    @NotBlank
-    @Size(min = 3)
-    String name;
+    @NotBlank(message = "Name cannot be empty")
+    private String name;
 
     @Override
     public HubEventType getType() {

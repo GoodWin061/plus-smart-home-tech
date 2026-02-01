@@ -2,25 +2,23 @@ package ru.yandex.practicum.model.hub;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString(callSuper = true)
 public class ScenarioCondition {
-    @NotBlank
-    String sensorId;
+    @NotBlank(message = "ID sensor cannot be empty")
+    private String sensorId;
 
-    @NotNull
-    ConditionType type;
+    @NotNull(message = "Type cannot be null")
+    private ConditionType type;
 
-    @NotNull
-    ConditionOperation operation;
+    @NotNull(message = "Operation cannot be null")
+    private ConditionOperation operation;
 
-    Integer value;
+    @NotNull(message = "Value cannot be null")
+    private Integer value;
 }

@@ -1,33 +1,25 @@
 package ru.yandex.practicum.model.hub;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Getter
 @Setter
-@ToString
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@ToString(callSuper = true)
 public class ScenarioAddedEvent extends HubEvent {
-    @NotBlank
-    @Size(min = 3)
-    String name;
+    @NotBlank(message = "Name cannot be empty")
+    private String name;
 
-    @Valid
-    @NotEmpty
-    List<ScenarioCondition> conditions;
+    @NotEmpty(message = "List conditions cannot be empty")
+    private List<ScenarioCondition> conditions;
 
-    @Valid
-    @NotEmpty
-    List<DeviceAction> actions;
+    @NotEmpty(message = "List actions cannot be empty")
+    private List<DeviceAction> actions;
 
     @Override
     public HubEventType getType() {
