@@ -11,12 +11,6 @@
 
     <artifactId>avro-schemas</artifactId>
 
-    <properties>
-        <avro.version>1.11.3</avro.version>
-        <kafka.version>3.6.1</kafka.version>
-        <confluent.version>7.6.0</confluent.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.avro</groupId>

@@ -17,7 +17,7 @@ protocol HubEventProtocol {
 		HUMIDITY
 	}
 
-	enum ConditionOperationAvro {
+	enum ConditionOperationAvro{
 		EQUALS,
 		GREATER_THAN,
 		LOWER_THAN
@@ -65,12 +65,6 @@ protocol HubEventProtocol {
 	record HubEventAvro {
 		string hub_id;
 		timestamp_ms timestamp;
-		union {
-			null,
-			DeviceAddedEventAvro,
-			DeviceRemovedEventAvro,
-			ScenarioAddedEventAvro,
-			ScenarioRemovedEventAvro
-		} payload;
+		union { DeviceAddedEventAvro, DeviceRemovedEventAvro, ScenarioAddedEventAvro, ScenarioRemovedEventAvro } payload;
 	}
 }

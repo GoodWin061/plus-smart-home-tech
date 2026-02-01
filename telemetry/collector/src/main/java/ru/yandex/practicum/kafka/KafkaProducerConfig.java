@@ -1,41 +1,51 @@
 package ru.yandex.practicum.kafka;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
+import java.util.Properties;
 
-@Getter
-@Setter
 @Configuration
 public class KafkaProducerConfig {
 
     @Bean
-    public ProducerFactory<String, SpecificRecordBase> producerFactory() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GeneralAvroSerializer.class);
-        return new DefaultKafkaProducerFactory<>(config);
-    }
+    KafkaClientProducer getProducer() {
+        return new KafkaClientProducer() {
+            private Producer<String, SpecificRecordBase> producer;
+            @Value("${kafka.bootstrap.server}")
+            private String bootstrapServer;
 
-    @Bean
-    public KafkaTemplate<String, SpecificRecordBase> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
+            @Override
+            public Producer<String, SpecificRecordBase> getProducer() {
+                if (producer == null) {
+                    initProducer();
+                }
+                return producer;
+            }
 
-    @Bean
-    public Producer<String, SpecificRecordBase> kafkaProducer(ProducerFactory<String, SpecificRecordBase> producerFactory) {
-        return producerFactory.createProducer();
+            private void initProducer() {
+                Properties config = new Properties();
+                config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);
+                config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+                config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GeneralAvroSerializer.class);
+
+                producer = new KafkaProducer<>(config);
+            }
+
+            @Override
+            public void stop() {
+                if (producer != null) {
+                    producer.flush();
+                    producer.close(Duration.ofSeconds(30));
+                }
+            }
+        };
     }
 }

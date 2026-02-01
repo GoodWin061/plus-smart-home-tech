@@ -5,18 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 @Getter
 @Setter
 @ToString(callSuper = true)
 public class MotionSensorEvent extends SensorEvent {
-    @NotNull(message = "Quality link cannot be null")
-    private Integer linkQuality;
-
-    @NotNull(message = "Motion cannot be null")
+    @NotNull
+    private int linkQuality;
+    @NotNull
     private Boolean motion;
-
-    @NotNull(message = "Voltage cannot be null")
-    private Integer voltage;
+    @NotNull
+    private int voltage;
 
     @Override
     public SensorEventType getType() {

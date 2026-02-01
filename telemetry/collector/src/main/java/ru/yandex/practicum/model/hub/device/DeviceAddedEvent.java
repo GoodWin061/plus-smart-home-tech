@@ -1,19 +1,23 @@
-package ru.yandex.practicum.model.hub;
+package ru.yandex.practicum.model.hub.device;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.practicum.model.hub.HubEvent;
+import ru.yandex.practicum.model.hub.HubEventType;
+
 
 @Getter
 @Setter
 @ToString(callSuper = true)
 public class DeviceAddedEvent extends HubEvent {
-    @NotBlank(message = "ID cannot be empty")
+
+    @NotBlank
     private String id;
 
-    @NotNull(message = "DeviceType cannot be null")
+    @NotNull
     private DeviceType deviceType;
 
     @Override

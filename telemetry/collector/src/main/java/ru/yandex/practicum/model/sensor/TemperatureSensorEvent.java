@@ -5,15 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 @Getter
 @Setter
 @ToString(callSuper = true)
 public class TemperatureSensorEvent extends SensorEvent {
-    @NotNull(message = "Temperature (C) cannot be null")
-    private Integer temperatureC;
-
-    @NotNull(message = "Temperature (F) cannot be null")
-    private Integer temperatureF;
+    @NotNull
+    private int temperatureC;
+    @NotNull
+    private int temperatureF;
 
     @Override
     public SensorEventType getType() {

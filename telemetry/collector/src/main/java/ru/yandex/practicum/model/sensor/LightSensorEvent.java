@@ -5,15 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 @Getter
 @Setter
 @ToString(callSuper = true)
 public class LightSensorEvent extends SensorEvent {
-    @NotNull(message = "Quality link cannot be null")
-    private Integer linkQuality;
-
-    @NotNull(message = "Luminosity cannot be null")
-    private Integer luminosity;
+    @NotNull
+    private int linkQuality;
+    @NotNull
+    private int luminosity;
 
     @Override
     public SensorEventType getType() {
