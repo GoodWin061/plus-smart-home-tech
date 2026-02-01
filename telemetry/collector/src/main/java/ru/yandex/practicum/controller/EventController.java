@@ -1,6 +1,8 @@
 package ru.yandex.practicum.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import ru.yandex.practicum.model.hub.HubEvent;
 import ru.yandex.practicum.model.hub.HubEventType;
 import ru.yandex.practicum.model.sensor.SensorEvent;
@@ -12,42 +14,41 @@ import ru.yandex.practicum.model.sensor.SensorEventType;
 import ru.yandex.practicum.service.hub.HubEventHandler;
 import ru.yandex.practicum.service.sensor.SensorEventHandler;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/events")
+@RequestMapping(path = "/events", consumes = MediaType.APPLICATION_JSON_VALUE)
 public class EventController {
     private final Map<SensorEventType, SensorEventHandler> sensorEventHandlers;
     private final Map<HubEventType, HubEventHandler> hubEventHandlers;
 
-    public EventController(Set<SensorEventHandler> sensorEventHandlers, Set<HubEventHandler> hubEventHandlers) {
-        this.sensorEventHandlers = sensorEventHandlers.stream()
+    public EventController(List<SensorEventHandler> sensorEventHandlerList, List<HubEventHandler> hubEventHandlerList) {
+        this.sensorEventHandlers = sensorEventHandlerList.stream()
                 .collect(Collectors.toMap(SensorEventHandler::getMessageType, Function.identity()));
-        this.hubEventHandlers = hubEventHandlers.stream()
+        this.hubEventHandlers = hubEventHandlerList.stream()
                 .collect(Collectors.toMap(HubEventHandler::getMessageType, Function.identity()));
     }
 
     @PostMapping("/sensors")
-    public void collectSensorEvent(@RequestBody SensorEvent event) {
-        log.info("Старт события датчика: {}", event);
-        SensorEventHandler handler = sensorEventHandlers.get(event.getType());
-        if (handler == null) {
-            throw new IllegalArgumentException("Обработчик для события " + event.getType() + " не найден.");
+    public void collectSensorEvent(@Valid @RequestBody SensorEvent request) {
+        if (sensorEventHandlers.containsKey(request.getType())) {
+            sensorEventHandlers.get(request.getType()).handle(request);
+        } else {
+            throw new IllegalArgumentException("Не найден обработчик для события " + request.getType());
         }
-        handler.handle(event);
     }
 
     @PostMapping("/hubs")
-    public void collectHubEvent(@RequestBody HubEvent event) {
-        log.info("Начало события хаба: {}", event);
-        HubEventHandler handler = hubEventHandlers.get(event.getType());
-        if (handler == null) {
-            throw new IllegalArgumentException("Обработчик для события " + event.getType() + " не найден.");
+    public void collectHubEvent(@Valid @RequestBody HubEvent request) {
+        if (hubEventHandlers.containsKey(request.getType())) {
+            hubEventHandlers.get(request.getType()).handle(request);
+        } else {
+            throw new IllegalArgumentException("Не найден обработчик для события " + request.getType());
         }
-        handler.handle(event);
     }
 }
+
