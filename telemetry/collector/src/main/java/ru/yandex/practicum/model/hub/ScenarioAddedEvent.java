@@ -1,4 +1,4 @@
-package ru.yandex.practicum.model.hub.scenario;
+package ru.yandex.practicum.model.hub;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -6,8 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.yandex.practicum.model.hub.HubEvent;
-import ru.yandex.practicum.model.hub.HubEventType;
+import ru.yandex.practicum.model.hub.device.DeviceAction;
 
 import java.util.List;
 

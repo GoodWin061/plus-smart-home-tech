@@ -1,4 +1,4 @@
-package ru.yandex.practicum.model.hub.scenario;
+package ru.yandex.practicum.model.hub;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -9,9 +9,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class DeviceAction {
+public class ScenarioCondition {
     @NotBlank
     private String sensorId;
-    private ActionType type;
+    private ConditionType type;
+    private Operation operation;
     private int value;
 }

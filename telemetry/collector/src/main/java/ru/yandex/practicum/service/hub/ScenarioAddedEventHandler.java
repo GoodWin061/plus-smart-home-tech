@@ -5,9 +5,9 @@ import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.kafka.KafkaClientProducer;
 import ru.yandex.practicum.model.hub.HubEvent;
 import ru.yandex.practicum.model.hub.HubEventType;
-import ru.yandex.practicum.model.hub.scenario.DeviceAction;
-import ru.yandex.practicum.model.hub.scenario.ScenarioAddedEvent;
-import ru.yandex.practicum.model.hub.scenario.ScenarioCondition;
+import ru.yandex.practicum.model.hub.device.DeviceAction;
+import ru.yandex.practicum.model.hub.ScenarioAddedEvent;
+import ru.yandex.practicum.model.hub.ScenarioCondition;
 
 @Component
 public class ScenarioAddedEventHandler extends BaseHubEventHandler<ScenarioAddedEventAvro> {

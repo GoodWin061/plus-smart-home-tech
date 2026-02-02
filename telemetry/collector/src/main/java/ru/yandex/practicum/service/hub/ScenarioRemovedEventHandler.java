@@ -5,7 +5,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 import ru.yandex.practicum.kafka.KafkaClientProducer;
 import ru.yandex.practicum.model.hub.HubEvent;
 import ru.yandex.practicum.model.hub.HubEventType;
-import ru.yandex.practicum.model.hub.scenario.ScenarioRemovedEvent;
+import ru.yandex.practicum.model.hub.ScenarioRemovedEvent;
 
 @Component
 public class ScenarioRemovedEventHandler extends BaseHubEventHandler<ScenarioRemovedEventAvro> {
