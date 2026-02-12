@@ -24,13 +24,13 @@ public class HubEventProcessor implements Runnable {
     private final HubEventHandlers handlers;
     @Value("${kafka.topics.hubs}")
     private String hubsTopic;
-
+    private int heartbeatCounter = 0;
 
     @Override
     public void run() {
         try {
             hubConsumer.subscribe(List.of(hubsTopic));
-            log.info("Подписались на топик хабов");
+            log.info("Подписались на топик хабов: {}", hubsTopic);
             Runtime.getRuntime().addShutdownHook(new Thread(hubConsumer::wakeup));
             Map<String, HubEventHandler> handlerMap = handlers.getHandlers();
 
@@ -51,16 +51,24 @@ public class HubEventProcessor implements Runnable {
                 }
 
                 hubConsumer.commitSync();
-                log.info("Хартбит хаб");
+                heartbeatCounter++;
+                if (heartbeatCounter % 30 == 0) {
+                    log.info("Хартбит хаб — потребитель активен, обработано сообщений: {}", heartbeatCounter);
+                    heartbeatCounter = 0;
+                } else {
+                    log.debug("Хартбит хаб - проверка жизнеспособности");
+                }
             }
         } catch (WakeupException ignored) {
         } catch (Exception e) {
-            log.error("Ошибка чтения данных из топика {}", hubsTopic);
+            log.error("Критическая ошибка в обработчике топика {}: {}", hubsTopic, e.getMessage(), e);
         } finally {
             try {
+                log.info("Выполняем финальный коммит перед закрытием...");
                 hubConsumer.commitSync();
             } finally {
                 hubConsumer.close();
+                log.info("Kafka-потребитель закрыт");
             }
         }
     }
